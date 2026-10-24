@@ -289,6 +289,18 @@ function fallbackTTS(t){
   if(v)u.voice=v;
   speechSynthesis.speak(u);
 }
+function speakSentence(w){
+  const d=DATA.find(x=>x.w===w);
+  try{
+    if(speak.cur){speak.cur.pause();speak.cur=null;}
+    const a=new Audio('audio/sentences/sentence_'+w.replace(/ /g,'_')+'.mp3');
+    speak.cur=a;
+    const p=a.play();
+    if(p)p.catch(()=>{if(d)fallbackTTS(d.ex)});
+    return;
+  }catch(e){}
+  if(d)fallbackTTS(d.ex);
+}
 function speakWord(w){speak(w);touch(w);refreshBadges(w);}
 function updateProg(){
   const n=Object.keys(prog).length;
@@ -328,7 +340,7 @@ function renderLearn(){
       '<div id="bd_'+id+'">'+badgeHtml(d.w)+'</div>'+
       '<div class="ipa">'+d.ipa+'</div>'+
       '<div class="cn">'+d.cn+'</div>'+
-      '<div class="ex"><div class="en">'+d.ex+'</div><div class="zh">'+d.exzh+'</div></div>'+
+      '<div class="ex"><div class="en">'+d.ex+' <button class="speak" style="min-width:38px;height:30px;font-size:13px" onclick="speakSentence(\''+d.w.replace(/'/g,"\\'")+'\')" aria-label="朗读例句">🔊</button></div><div class="zh">'+d.exzh+'</div></div>'+
       '<div class="use">用法：'+d.use+'</div></div>';
     return html;
   }).join('');
