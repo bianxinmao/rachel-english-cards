@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>英语学习卡片</title>
+<style>
+:root{
+  --bg:#f7f6f3; --card:#ffffff; --ink:#1d2733; --muted:#6b7683;
+  --line:#e5e2dc; --accent:#0e7a5f; --accent-soft:#e3f2ed;
+  --warn:#b7791f; --warn-soft:#fdf3e0; --danger:#c0392b;
+  --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:520px;margin:0 auto;padding:20px 16px calc(96px + env(safe-area-inset-bottom));}
+header{padding:8px 2px 18px;}
+header h1{font-size:22px;letter-spacing:.5px;}
+header p{color:var(--muted);font-size:13px;margin-top:4px;}
+.tabs{display:flex;gap:8px;margin-bottom:16px;}
+.tab{
+  flex:1;padding:11px 0;text-align:center;font-size:15px;border-radius:999px;
+  border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;
+}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.cat{font-size:13px;color:var(--accent);font-weight:600;margin:18px 2px 8px;}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px;margin-bottom:12px;position:relative;
+}
+.card.due{border-color:var(--warn);background:var(--warn-soft);}
+.row1{display:flex;align-items:center;gap:10px;}
+.word{font-size:22px;font-weight:700;letter-spacing:.3px;}
+.pos{font-size:12px;color:var(--muted);background:var(--bg);border-radius:6px;padding:2px 7px;}
+.speak{
+  margin-left:auto;min-width:44px;height:38px;border:none;border-radius:10px;
+  background:var(--accent-soft);color:var(--accent);font-size:16px;cursor:pointer;
+}
+.speak:active{transform:scale(.95)}
+.badge{
+  display:inline-block;font-size:11px;border-radius:6px;padding:2px 7px;margin-top:8px;
+  background:var(--bg);color:var(--muted);
+}
+.badge.due{background:var(--warn);color:#fff;}
+.badge.done{background:var(--accent);color:#fff;}
+.ipa{font-family:"Times New Roman",serif;color:var(--accent);font-size:15px;margin-top:5px;}
+.cn{font-size:15px;margin-top:7px;}
+.ex{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+.ex .en{font-size:14.5px;line-height:1.5;}
+.ex .zh{font-size:13.5px;color:var(--muted);margin-top:3px;}
+.use{font-size:13px;color:var(--muted);margin-top:9px;line-height:1.55;}
+.use b{color:var(--ink);font-weight:600;}
+/* 复习 */
+.rv-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 16px;margin-bottom:12px;}
+.rv-word{font-size:26px;font-weight:700;text-align:center;}
+.rv-ipa{text-align:center;color:var(--accent);font-family:"Times New Roman",serif;margin:6px 0 14px;}
+.rv-speak{display:block;margin:0 auto 14px;min-width:88px;height:44px;border:none;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-size:16px;cursor:pointer;}
+.rv-cn{display:none;text-align:center;font-size:17px;margin-bottom:16px;color:var(--ink);}
+.rv-btns{display:flex;gap:10px;}
+.rv-btns button{flex:1;padding:14px 0;border:none;border-radius:12px;font-size:15px;cursor:pointer;min-height:48px;}
+.b-yes{background:var(--accent);color:#fff;}
+.b-no{background:#fbeaea;color:var(--danger);}
+.rv-next{width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;background:var(--ink);color:#fff;font-size:15px;cursor:pointer;display:none;}
+.rv-empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px;line-height:1.8;}
+.rv-empty b{color:var(--ink);}
+.hint{font-size:12px;color:var(--muted);text-align:center;margin-top:8px;}
+/* 自测 */
+.quiz-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 16px;}
+.q-head{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:14px;}
+.q-word{font-size:24px;font-weight:700;text-align:center;margin:14px 0 4px;}
+.q-ipa{text-align:center;color:var(--accent);font-family:"Times New Roman",serif;margin-bottom:16px;}
+.opt{
+  display:block;width:100%;text-align:left;padding:14px 14px;margin-bottom:10px;
+  border:1px solid var(--line);border-radius:12px;background:#fff;font-size:15px;cursor:pointer;min-height:48px;
+}
+.opt.right{border-color:var(--accent);background:var(--accent-soft);}
+.opt.wrong{border-color:var(--danger);background:#fbeaea;}
+.opt:disabled{cursor:default;}
+.next{
+  width:100%;padding:13px;border:none;border-radius:12px;background:var(--ink);
+  color:#fff;font-size:15px;cursor:pointer;margin-top:4px;min-height:48px;
+}
+.next:disabled{opacity:.35;}
+.done{text-align:center;padding:30px 10px;}
+.done .big{font-size:40px;font-weight:800;color:var(--accent);}
+.done p{color:var(--muted);margin:10px 0 18px;}
+/* bottom bar */
+.bottom{
+  position:fixed;left:0;right:0;bottom:0;background:var(--card);
+  border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+}
+.bottom .bar{max-width:520px;margin:0 auto;}
+.prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:8px;}
+.prog i{display:block;height:100%;background:var(--accent);transition:width .3s;}
+.bl{font-size:12px;color:var(--muted);text-align:center;}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>英语学习卡片</h1>
+    <p>艾宾浩斯记忆法：1 → 2 → 4 → 7 → 15 → 30 天循环复习　<a href="javascript:void(0)" onclick="resetProg()" style="color:var(--danger);font-size:12px">重置进度</a></p>
+  </header>
+  <div class="tabs">
+    <button class="tab on" id="tabLearn">学习</button>
+    <button class="tab" id="tabReview">复习</button>
+    <button class="tab" id="tabQuiz">自测</button>
+  </div>
+  <div id="learn"></div>
+  <div id="review" style="display:none"></div>
+  <div id="quiz" style="display:none"></div>
+</div>
+<div class="bottom"><div class="bar">
+  <div class="prog"><i id="pbar" style="width:0%"></i></div>
+  <div class="bl" id="pinfo">已学 0 / 0</div>
+</div></div>
+
+<script>
+const DATA=[
+ {c:"开会与讨论",w:"schedule",ipa:"/ˈskedʒuːl/ 美 /ˈskedʒʊl/",pos:"n./v.",cn:"日程；安排，预定",ex:"Let's schedule a meeting for Thursday afternoon.",exzh:"我们把会议安排在周四下午吧。",use:"职场高频词。名词指<b>日程表</b>（on schedule 按时 / behind schedule 拖延），动词指<b>安排时间</b>：schedule a call / a meeting。"},
+ {c:"开会与讨论",w:"deadline",ipa:"/ˈdedlaɪn/",pos:"n.",cn:"截止日期，最后期限",ex:"The deadline for the report is Friday.",exzh:"报告的截止日期是周五。",use:"固定搭配 <b>meet the deadline</b>（赶上期限）和 <b>miss the deadline</b>（错过期限），审计和项目里最常用。"},
+ {c:"开会与讨论",w:"confirm",ipa:"/kənˈfɜːrm/",pos:"v.",cn:"确认，证实",ex:"Please confirm receipt of this email.",exzh:"请确认收到这封邮件。",use:"商务邮件必备。<b>confirm</b> 后直接接名词或 that 从句；名词形式是 confirmation。"},
+ {c:"开会与讨论",w:"review",ipa:"/rɪˈvjuː/",pos:"n./v.",cn:"审阅，复核；回顾",ex:"We need to review the working papers before submission.",exzh:"提交前我们需要复核底稿。",use:"审计场景高频：review the files / papers（复核底稿）。名词 review 常指<b>复核程序</b>。"},
+ {c:"开会与讨论",w:"proposal",ipa:"/prəˈpoʊzl/",pos:"n.",cn:"提案，建议书",ex:"The client accepted our audit proposal.",exzh:"客户接受了我们的审计建议书。",use:"动词是 propose（提议）。常用搭配 <b>submit a proposal</b>（提交提案）、<b>approve a proposal</b>（批准提案）。"},
+ {c:"财务与审计",w:"reconcile",ipa:"/ˈrekənsaɪl/",pos:"v.",cn:"核对，对账；使一致",ex:"We must reconcile the bank statement with the ledger.",exzh:"我们必须把银行对账单和总账核对一致。",use:"财务核心词。名词 <b>reconciliation</b>（银行余额调节表）。注意重音在第一音节。"},
+ {c:"财务与审计",w:"ledger",ipa:"/ˈledʒər/",pos:"n.",cn:"总账，分类账",ex:"All entries are recorded in the general ledger.",exzh:"所有分录都记在总账里。",use:"general ledger（总账，缩写 GL）是审计底稿常见缩写。sub-ledger 是明细账。"},
+ {c:"财务与审计",w:"adjustment",ipa:"/əˈdʒʌstmənt/",pos:"n.",cn:"调整，调整分录",ex:"The auditor proposed two adjustments to the financial statements.",exzh:"审计师对财务报表提出了两项调整。",use:"审计里 audit adjustment 指<b>审计调整分录</b>。动词 adjust（调整），adjusting entry = 调整分录。"},
+ {c:"财务与审计",w:"materiality",ipa:"/məˌtɪriˈæləti/",pos:"n.",cn:"重要性（水平）",ex:"We set materiality at 5% of total assets.",exzh:"我们将重要性水平设定为总资产的5%。",use:"审计最核心概念之一。形容词 <b>material</b>（重大的）：a material misstatement 重大错报。"},
+ {c:"财务与审计",w:"voucher",ipa:"/ˈvaʊtʃər/",pos:"n.",cn:"凭证，凭单",ex:"Please attach the invoice to the payment voucher.",exzh:"请把发票附在付款凭证后面。",use:"payment voucher 付款凭证，reimbursement voucher 报销单。国内财务说的「凭证」就是它。"},
+ {c:"财务与审计",w:"receivable",ipa:"/rɪˈsiːvəbl/",pos:"n.(常用复数)",cn:"应收款项",ex:"Accounts receivable increased by 10% this quarter.",exzh:"本季度应收账款增长了10%。",use:"accounts receivable（AR）应收账款；notes receivable 应收票据；对面的应付账款是 accounts <b>payable</b>。"},
+ {c:"财务与审计",w:"depreciation",ipa:"/dɪˌpriːʃiˈeɪʃn/",pos:"n.",cn:"折旧",ex:"Annual depreciation of the equipment is recorded monthly.",exzh:"设备年折旧按月记录。",use:"固定短语 <b>accumulated depreciation</b>（累计折旧）。动词 depreciate（贬值、计提折旧）。"},
+ {c:"数据与分析",w:"analyze",ipa:"/ˈænəlaɪz/",pos:"v.",cn:"分析",ex:"We analyzed the data from three different angles.",exzh:"我们从三个不同角度分析了数据。",use:"英式拼写 analyse，美式 analyze。名词 analysis（复数 analyses），注意发音重音变化 /əˈnæləsɪs/。"},
+ {c:"数据与分析",w:"trend",ipa:"/trend/",pos:"n.",cn:"趋势，走向",ex:"The trend shows a steady increase in revenue.",exzh:"趋势显示收入稳步增长。",use:"数据分析高频：an upward/downward trend 上升/下降趋势；follow the trend 跟随趋势。"},
+ {c:"数据与分析",w:"fluctuate",ipa:"/ˈflʌktʃueɪt/",pos:"v.",cn:"波动，起伏",ex:"Exchange rates fluctuated sharply last month.",exzh:"上月汇率剧烈波动。",use:"名词 fluctuation。比 change 更精确，专指<b>不规则上下波动</b>，财务和数据分析里很常用。"},
+ {c:"数据与分析",w:"criteria",ipa:"/kraɪˈtɪriə/",pos:"n.(复数)",cn:"标准，准则",ex:"We sorted the samples according to strict criteria.",exzh:"我们按严格的标准筛选样本。",use:"单数是 <b>criterion</b>。作复数用，后面接 of/for：criteria for selection 遴选标准。"},
+ {c:"数据与分析",w:"significant",ipa:"/sɪɡˈnɪfɪkənt/",pos:"adj.",cn:"显著的；重要的",ex:"There is a significant difference between the two groups.",exzh:"两组之间存在显著差异。",use:"统计学里指<b>统计显著</b>（statistically significant）；日常指「明显的、值得注意的」。"},
+ {c:"数据与分析",w:"estimate",ipa:"/ˈestɪmeɪt/ (v.) /ˈestɪmət/ (n.)",pos:"v./n.",cn:"估计；估算值",ex:"We estimate the cost at around 50,000 dollars.",exzh:"我们估计费用在5万美元左右。",use:"注意：动词和名词拼写相同但<b>重音不同</b>。名词 an estimate；动词 estimate the cost。"},
+ {c:"日常沟通",w:"available",ipa:"/əˈveɪləbl/",pos:"adj.",cn:"可用的；有空的",ex:"Are you available for a quick call tomorrow morning?",exzh:"明天早上你有空接个简短电话吗？",use:"问人有没有空最礼貌的说法就是 Are you available...? 反义 unavailable。文件「可供查阅」也可用 available。"},
+ {c:"日常沟通",w:"appreciate",ipa:"/əˈpriːʃieɪt/",pos:"v.",cn:"感激；理解，意识到",ex:"I really appreciate your help with this matter.",exzh:"非常感谢你在这件事上的帮助。",use:"商务邮件结尾礼貌用语：<b>I would appreciate it if you could...</b>（如果您能……我将不胜感激）。"},
+ {c:"日常沟通",w:"follow up",ipa:"/ˈfɒloʊ ʌp/",pos:"v.短语",cn:"跟进，后续联系",ex:"I'm following up on my email from last week.",exzh:"我想跟进一下我上周发的邮件。",use:"催办必备。follow up on + 事项；名词 a follow-up。礼貌催别人回复就用这个开头。"},
+ {c:"日常沟通",w:"prioritize",ipa:"/praɪˈɔːrətaɪz/",pos:"v.",cn:"优先处理，排优先级",ex:"Please prioritize the urgent tasks first.",exzh:"请优先处理紧急任务。",use:"名词 priority（优先事项）。top priority 头等大事；low priority 优先级低。"},
+ {c:"日常沟通",w:"compromise",ipa:"/ˈkɑːmprəmaɪz/",pos:"n./v.",cn:"妥协，折中方案",ex:"We reached a compromise on the delivery date.",exzh:"我们就交货日期达成了折中方案。",use:"reach/make a compromise 达成妥协。注意另一义：<b>compromise security</b> 危及安全（数据泄露新闻常用）。"},
+ {c:"日常沟通",w:"regarding",ipa:"/rɪˈɡɑːrdɪŋ/",pos:"prep.",cn:"关于",ex:"I'm writing regarding your recent inquiry.",exzh:"来信是关于您近期的咨询。",use:"邮件主题行高频：Regarding + 事项 = 「关于……」。同义 in regard to / with regard to，比 about 更正式。"}
+];
+const IV=[1,2,4,7,15,30], DAY=864e5, MIN=6e4;
+/* 扩展词库：初始24词学完后，每天解锁5个 */
+const BANK=[
+ {c:"开会与讨论",w:"agenda",ipa:"/əˈdʒendə/",pos:"n.",cn:"议程，议题",ex:"The agenda for tomorrow's meeting has three items.",exzh:"明天会议的议程有三项。",use:"固定搭配 <b>on the agenda</b>（在议程上）：Let's put this on the agenda。"},
+ {c:"开会与讨论",w:"minutes",ipa:"/ˈmɪnɪts/",pos:"n.(复数)",cn:"会议记录",ex:"Who will take the minutes today?",exzh:"今天谁做会议记录？",use:"注意不是「分钟」！take/keep the minutes 做会议记录；minutes of the meeting 会议纪要。"},
+ {c:"开会与讨论",w:"postpone",ipa:"/poʊstˈpoʊn/",pos:"v.",cn:"推迟，延期",ex:"The meeting was postponed until next week.",exzh:"会议被推迟到下周。",use:"postpone + 名词/to+时间。同义 put off（口语）。名词 postponement。"},
+ {c:"开会与讨论",w:"attend",ipa:"/əˈtend/",pos:"v.",cn:"出席，参加",ex:"All managers are required to attend the review meeting.",exzh:"所有经理都必须参加复评会议。",use:"attend a meeting/class 出席会议/上课。名词 attendance（出勤）。注意：attend 及物，不加 to。"},
+ {c:"开会与讨论",w:"assign",ipa:"/əˈsaɪn/",pos:"v.",cn:"分配，指派",ex:"The task was assigned to our team.",exzh:"这个任务被分配给了我们团队。",use:"assign sth to sb 把某事指派给某人。名词 assignment（任务；作业）。"},
+ {c:"财务与审计",w:"engagement",ipa:"/ɪnˈɡeɪdʒmənt/",pos:"n.",cn:"（审计）业务约定；聘约",ex:"We signed the engagement letter last Friday.",exzh:"我们上周五签署了业务约定书。",use:"审计专用义：engagement letter = <b>业务约定书</b>，engagement team = 审计项目组。别只记「约会」。"},
+ {c:"财务与审计",w:"sampling",ipa:"/ˈsæmplɪŋ/",pos:"n.",cn:"抽样",ex:"We use statistical sampling to select transactions.",exzh:"我们用统计抽样来选取交易。",use:"audit sampling 审计抽样；sample size 样本量。动词 sample（抽样检查）。"},
+ {c:"财务与审计",w:"workpaper",ipa:"/ˈwɜːrkpeɪpər/",pos:"n.",cn:"审计工作底稿",ex:"All workpapers must be filed before the report is issued.",exzh:"出具报告前必须完成所有底稿归档。",use:"常写 workpapers（复数）或 working papers，就是国内说的<b>底稿</b>。"},
+ {c:"财务与审计",w:"assurance",ipa:"/əˈʃʊərəns/",pos:"n.",cn:"保证，鉴证",ex:"We provide reasonable assurance on the financial statements.",exzh:"我们对财务报表提供合理保证。",use:"assurance services 鉴证业务；reasonable assurance 合理保证（审计的标志表述）。"},
+ {c:"财务与审计",w:"compliance",ipa:"/kəmˈplaɪəns/",pos:"n.",cn:"合规，遵守",ex:"The company is in full compliance with tax regulations.",exzh:"公司完全遵守税务法规。",use:"in compliance with 遵守；compliance test 控制测试/合规测试。形容词 compliant。"},
+ {c:"财务与审计",w:"discrepancy",ipa:"/dɪsˈkrepənsi/",pos:"n.",cn:"差异，不一致",ex:"There is a discrepancy between the two reports.",exzh:"两份报告之间存在差异。",use:"指<b>应该一致却不一致</b>的地方，对账、盘点最常用。同义 difference，但 discrepancy 更正式。"},
+ {c:"财务与审计",w:"verify",ipa:"/ˈverɪfaɪ/",pos:"v.",cn:"核实，查证",ex:"We verified the balances with the bank directly.",exzh:"我们直接与银行核对了余额。",use:"verify + 名词。名词 verification（函证、验证）。形容词 verifiable（可验证的）。"},
+ {c:"财务与审计",w:"assess",ipa:"/əˈses/",pos:"v.",cn:"评估，评定",ex:"We need to assess the risk of material misstatement.",exzh:"我们需要评估重大错报风险。",use:"assess risk 评估风险（审计高频）。名词 assessment（评估）：risk assessment 风险评估。注意拼写双 s。"},
+ {c:"财务与审计",w:"assertion",ipa:"/əˈsɜːrʃn/",pos:"n.",cn:"（管理层的）认定",ex:"We tested the existence assertion for inventory.",exzh:"我们对存货的存在性认定进行了测试。",use:"审计理论核心词：management assertions 管理层认定（存在、完整性、准确性等）。"},
+ {c:"财务与审计",w:"inventory",ipa:"/ˈɪnvəntɔːri/",pos:"n.",cn:"存货；库存清单",ex:"We attended the annual inventory count.",exzh:"我们参加了年度存货盘点。",use:"inventory count 存货盘点（审计必参加）。动词方式：take inventory 盘点。"},
+ {c:"财务报表",w:"revenue",ipa:"/ˈrevənuː/",pos:"n.",cn:"收入，营收",ex:"Revenue grew 15% year over year.",exzh:"收入同比增长了15%。",use:"revenue recognition 收入确认（审计重点领域）。区别 income（利润/收益）。"},
+ {c:"财务报表",w:"expense",ipa:"/ɪkˈspens/",pos:"n.",cn:"费用，开支",ex:"Operating expenses increased faster than revenue.",exzh:"营业费用的增长快于收入。",use:"operating expenses（OpEx）营业费用；capital expenditure（CapEx）资本支出。动词 expend。"},
+ {c:"财务报表",w:"liability",ipa:"/ˌlaɪəˈbɪləti/",pos:"n.",cn:"负债；责任",ex:"Total liabilities exceed total assets this year.",exzh:"今年总负债超过了总资产。",use:"assets and liabilities 资产与负债。legal liability 法律责任。复数 liabilities 常指负债总额。"},
+ {c:"财务报表",w:"equity",ipa:"/ˈekwəti/",pos:"n.",cn:"权益，股本",ex:"Return on equity improved to 12 percent.",exzh:"净资产收益率提升至12%。",use:"owners' equity 所有者权益；statement of changes in equity 权益变动表。会计恒等式：Assets = Liabilities + Equity。"},
+ {c:"财务报表",w:"accrual",ipa:"/əˈkruːəl/",pos:"n.",cn:"权责发生；应计项目",ex:"We record expenses on the accrual basis.",exzh:"我们按权责发生制记录费用。",use:"accrual basis 权责发生制（对比 cash basis 收付实现制）。动词 accrue（计提、自然增长）。"},
+ {c:"财务报表",w:"provision",ipa:"/prəˈvɪʒn/",pos:"n.",cn:"准备金；条款",ex:"The bank increased its provision for bad loans.",exzh:"银行提高了不良贷款准备金。",use:"两义都常考：<b>准备金</b>（provision for bad debts 坏账准备）和<b>法规条款</b>（under the provisions of the law）。"},
+ {c:"财务报表",w:"deficit",ipa:"/ˈdefəsɪt/",pos:"n.",cn:"赤字，亏损",ex:"The company reported a cash deficit last quarter.",exzh:"公司上季度报告了现金赤字。",use:"budget deficit 预算赤字；反义 surplus 盈余。搭配 run a deficit 出现赤字。"},
+ {c:"财务报表",w:"consolidation",ipa:"/kənˌsɒlɪˈdeɪʃn/",pos:"n.",cn:"合并，报表合并",ex:"Consolidation eliminated intercompany transactions.",exzh:"合并抵销了内部关联交易。",use:"consolidated financial statements 合并财务报表。动词 consolidate（合并）。intercompany 内部交易。"},
+ {c:"数据分析",w:"statistic",ipa:"/stəˈtɪstɪk/",pos:"n.",cn:"统计数据",ex:"The statistics show a clear downward trend.",exzh:"统计数据显示出明显的下降趋势。",use:"statistics 统计学/统计数据（作学科时单数）。statistical significance 统计显著性。"},
+ {c:"数据分析",w:"correlation",ipa:"/ˌkɔːrəˈleɪʃn/",pos:"n.",cn:"相关性",ex:"There is a strong correlation between sales and advertising.",exzh:"销售与广告之间有很强的相关性。",use:"correlation between A and B。注意：<b>correlation is not causation</b> 相关不等于因果——数据分析金句。"},
+ {c:"数据分析",w:"forecast",ipa:"/ˈfɔːrkæst/",pos:"v./n.",cn:"预测",ex:"We forecast a 10% increase in demand.",exzh:"我们预测需求将增长10%。",use:"过去式仍为 forecast（不是 forecasted）。cash flow forecast 现金流预测。"},
+ {c:"数据分析",w:"benchmark",ipa:"/ˈbentʃmɑːrk/",pos:"n./v.",cn:"基准；对标",ex:"We benchmark our costs against industry standards.",exzh:"我们以行业标准为基准对比成本。",use:"benchmark against 与……对标。作名词指<b>参照标准</b>。"},
+ {c:"数据分析",w:"indicator",ipa:"/ˈɪndɪkeɪtər/",pos:"n.",cn:"指标",ex:"Customer satisfaction is a key performance indicator.",exzh:"客户满意度是一个关键绩效指标。",use:"KPI = key performance indicator 关键绩效指标。动词 indicate（表明）。"},
+ {c:"数据处理",w:"summarize",ipa:"/ˈsʌməraɪz/",pos:"v.",cn:"总结，概括",ex:"Please summarize the findings in one page.",exzh:"请用一页纸总结发现。",use:"名词 summary（摘要）。summarize the results/findings 总结结果/发现。"},
+ {c:"数据处理",w:"visualize",ipa:"/ˈvɪʒuəlaɪz/",pos:"v.",cn:"可视化，使形象化",ex:"The dashboard visualizes monthly sales data.",exzh:"这个仪表盘把月度销售数据可视化。",use:"名词 visualization（可视化图表）。data visualization 数据可视化。"},
+ {c:"数据处理",w:"filter",ipa:"/ˈfɪltər/",pos:"v./n.",cn:"筛选；过滤器",ex:"Filter the list by date before exporting.",exzh:"导出前先按日期筛选列表。",use:"Excel/数据库高频操作：filter by + 条件。名词 filter 筛选器；filter out 过滤掉。"},
+ {c:"数据处理",w:"export",ipa:"/ɪkˈspɔːrt/",pos:"v./n.",cn:"导出；出口",ex:"Export the report as a PDF file.",exzh:"把报告导出为PDF文件。",use:"export to + 格式。反义 import（导入；进口）。重音：动词后重音，名词前重音。"},
+ {c:"邮件沟通",w:"attach",ipa:"/əˈtætʃ/",pos:"v.",cn:"附上，附件",ex:"Please find the contract attached.",exzh:"请查收附件中的合同。",use:"attachment 附件。经典邮件句：<b>Attached please find...</b> / Please see attached。"},
+ {c:"邮件沟通",w:"forward",ipa:"/ˈfɔːrwərd/",pos:"v.",cn:"转发",ex:"Could you forward this email to the client?",exzh:"你能把这封邮件转发给客户吗？",use:"forward sth to sb 转发给某人。名词/形容词义是「向前；期货」(forwards contract 远期合约)。"},
+ {c:"邮件沟通",w:"notify",ipa:"/ˈnoʊtɪfaɪ/",pos:"v.",cn:"通知",ex:"We will notify you once the audit is complete.",exzh:"审计完成后我们会通知您。",use:"notify sb of sth。名词 notification（通知）。正式书面语，比 tell 正式。"},
+ {c:"邮件沟通",w:"remind",ipa:"/rɪˈmaɪnd/",pos:"v.",cn:"提醒",ex:"This is a friendly reminder about the overdue invoice.",exzh:"友情提醒：发票已逾期。",use:"a friendly reminder 温馨提示（催办邮件标题常用）。remind sb to do / remind sb of sth。"},
+ {c:"邮件沟通",w:"clarify",ipa:"/ˈklærɪfaɪ/",pos:"v.",cn:"澄清，说明",ex:"Could you clarify the third point in your report?",exzh:"你能澄清一下报告中第三点吗？",use:"clarify + 疑问词：clarify what/whether... 名词 clarification。礼貌请求澄清：Just to clarify,..."},
+ {c:"邮件沟通",w:"apologize",ipa:"/əˈpɑːlədʒaɪz/",pos:"v.",cn:"道歉",ex:"We apologize for the delay in our response.",exzh:"我们对回复迟缓深表歉意。",use:"apologize for + 事情。名词 apology（复数 apologies）。商务邮件致歉标准句。"},
+ {c:"邮件沟通",w:"assure",ipa:"/əˈʃʊr/",pos:"v.",cn:"向……保证",ex:"I assure you that the data has been double-checked.",exzh:"我向您保证数据已经过双重核对。",use:"assure sb that / assure sb of sth（必须带人做宾语）。区别 ensure（确保某事发生）、insure（投保）。"},
+ {c:"邮件沟通",w:"inquire",ipa:"/ɪnˈkwaɪər/",pos:"v.",cn:"询问，咨询",ex:"The client inquired about the audit fee.",exzh:"客户询问了审计费用。",use:"inquire about + 事项。名词 inquiry（询证函 = confirmation inquiry 里的询证也用它）。美式也拼 enquire。"},
+ {c:"职场表达",w:"overtime",ipa:"/ˈoʊvərtaɪm/",pos:"n./adv.",cn:"加班",ex:"We worked overtime to meet the filing deadline.",exzh:"为了赶上申报期限我们加班了。",use:"work overtime 加班（动词短语）。overtime pay 加班费。busy season 忙季是审计人的宿命。"},
+ {c:"职场表达",w:"colleague",ipa:"/ˈkɑːliːɡ/",pos:"n.",cn:"同事",ex:"My colleagues in the Beijing office helped a lot.",exzh:"北京办公室的同事帮了很多。",use:"注意发音 /ˈkɒliːɡ/，重音在前。区别 college（学院）。"},
+ {c:"职场表达",w:"evaluation",ipa:"/ɪˌvæljuˈeɪʃn/",pos:"n.",cn:"评估，考核",ex:"Annual performance evaluation starts next month.",exzh:"年度绩效考核下月开始。",use:"performance evaluation 绩效考核。动词 evaluate（同 assess 意思相近，更日常）。"},
+ {c:"职场表达",w:"promotion",ipa:"/prəˈmoʊʃn/",pos:"n.",cn:"晋升；促销",ex:"She got a promotion to senior auditor.",exzh:"她晋升为高级审计员。",use:"get/receive a promotion 晋升。另一义：sales promotion 促销。动词 promote。"},
+ {c:"职场表达",w:"resign",ipa:"/rɪˈzaɪn/",pos:"v.",cn:"辞职",ex:"The CFO resigned for personal reasons.",exzh:"首席财务官因个人原因辞职。",use:"resign from + 职位。名词 resignation（辞职信 = resignation letter）。注意区别 re-sign（重新签约）。"},
+ {c:"逻辑连接",w:"furthermore",ipa:"/ˈfɜːrðərmɔːr/",pos:"adv.",cn:"此外，而且",ex:"Furthermore, the sample size was too small.",exzh:"此外，样本量太小了。",use:"正式写作连接词，引出补充论据。同类：moreover, in addition。报告和邮件里非常好用。"},
+ {c:"逻辑连接",w:"nevertheless",ipa:"/ˌnevərðəˈles/",pos:"adv.",cn:"然而，尽管如此",ex:"Nevertheless, we believe the risk is controllable.",exzh:"尽管如此，我们认为风险是可控的。",use:"表示转折让步，比 but 正式得多，审计报告常用。<b>Nevertheless</b>, ... 放句首。"},
+ {c:"逻辑连接",w:"therefore",ipa:"/ˈðerfɔːr/",pos:"adv.",cn:"因此，所以",ex:"Therefore, we recommend an immediate review.",exzh:"因此，我们建议立即进行复核。",use:" therefore 推出结论，放句首加逗号。审计意见书里出现率最高的词之一。"},
+ {c:"逻辑连接",w:"whereas",ipa:"/werˈæz/",pos:"conj.",cn:"然而，鉴于",ex:"Revenue rose, whereas costs remained flat.",exzh:"收入上升了，而成本保持平稳。",use:"对比两类事实。合同里还有「鉴于」义：<b>Whereas</b> the parties agreed... 鉴于双方同意……"},
+ {c:"逻辑连接",w:"meanwhile",ipa:"/ˈmiːnwaɪl/",pos:"adv.",cn:"与此同时",ex:"Meanwhile, the finance team prepared the files.",exzh:"与此同时，财务团队在准备底稿。",use:"in the meanwhile/meantime 同义。叙述两件并行的事时用。"},
+ {c:"高频动词",w:"maintain",ipa:"/meɪnˈteɪn/",pos:"v.",cn:"维持，保养；坚持认为",ex:"The company maintains detailed accounting records.",exzh:"公司保存有详细的会计记录。",use:"maintain records/systems 维护记录/系统。名词 maintenance /ˈmeɪntənəns/（维护费）。"},
+ {c:"高频动词",w:"ensure",ipa:"/ɪnˈʃʊr/",pos:"v.",cn:"确保",ex:"Please ensure that all files are backed up.",exzh:"请确保所有文件都已备份。",use:"ensure + that 从句/名词。区别 assure（向人保证）、insure（投保）。写作高频。"},
+ {c:"高频动词",w:"involve",ipa:"/ɪnˈvɑːlv/",pos:"v.",cn:"涉及，包含",ex:"The engagement involves two overseas subsidiaries.",exzh:"这个项目涉及两家海外子公司。",use:"be involved in 参与/涉及。名词 involvement。展会项目范围时常用。"},
+ {c:"高频动词",w:"proceed",ipa:"/proʊˈsiːd/",pos:"v.",cn:"继续进行，着手",ex:"We will proceed with the fieldwork as planned.",exzh:"我们将按计划继续现场工作。",use:"proceed with + 事情。名词 procedure（程序）同源。fieldwork 现场工作。"},
+ {c:"高频动词",w:"effort",ipa:"/ˈefərt/",pos:"n.",cn:"努力",ex:"Thanks for everyone's effort on this project.",exzh:"感谢大家在这个项目上的努力。",use:"make an effort / put in effort 付出努力。joint effort 共同努力。"},
+ {c:"高频动词",w:"update",ipa:"/ʌpˈdeɪt/",pos:"v./n.",cn:"更新；最新进展",ex:"Please keep us updated on the progress.",exzh:"请让我们随时了解进展。",use:"update sb on sth 向某人更新某事。a quick update 简短进展汇报（晨会常用）。"}
+];
+let extra=parseInt(localStorage.getItem('eng_extra')||'0',10)||0;
+DATA.push.apply(DATA,BANK.slice(0,extra));
+function unlockNew(){
+  const todayStr=new Date().toDateString();
+  if(localStorage.getItem('eng_unlock_date')===todayStr){alert('今天的新词已解锁，明天再来！记忆需要时间沉淀~');return;}
+  const add=BANK.slice(extra,extra+5);
+  if(!add.length){alert('本期词库已学完，我会不定期补充新词');return;}
+  DATA.push.apply(DATA,add);
+  extra+=add.length;
+  localStorage.setItem('eng_extra',String(extra));
+  localStorage.setItem('eng_unlock_date',todayStr);
+  renderLearn();updateProg();
+  window.scrollTo({top:0,behavior:'smooth'});
+  alert('已解锁5个新词，就在列表最下方！');
+}
+const learnEl=document.getElementById('learn'),quizEl=document.getElementById('quiz'),rvEl=document.getElementById('review');
+const pbar=document.getElementById('pbar'),pinfo=document.getElementById('pinfo');
+/* 迁移旧数据 */
+let prog;
+try{prog=JSON.parse(localStorage.getItem('eng_prog')||'null')||{};}catch(e){prog={};}
+if(!Object.keys(prog).length){
+  const old=new Set(JSON.parse(localStorage.getItem('eng_seen')||'[]'));
+  if(old.size){DATA.forEach((d,i)=>{if(old.has(String(i)))prog[d.w]={s:0,d:Date.now()+DAY};});}
+}
+function saveProg(){localStorage.setItem('eng_prog',JSON.stringify(prog));}
+function touch(w){
+  if(!prog[w]){prog[w]={s:0,d:Date.now()+IV[0]*DAY};saveProg();updateProg();}
+}
+function fmtDue(ms){
+  const diff=ms-Date.now();
+  if(diff<=0)return '今日待复习';
+  if(diff<3600e3)return Math.ceil(diff/MIN)+'分钟后';
+  if(diff<DAY)return Math.ceil(diff/3600e3)+'小时后';
+  return Math.ceil(diff/DAY)+'天后';
+}
+function badgeHtml(w){
+  const p=prog[w];
+  if(!p)return '';
+  if(p.s>=IV.length)return '<span class="badge done">已完成6轮记忆 ✓</span>';
+  const due=p.d<=Date.now();
+  return '<span class="badge'+(due?' due':'')+'">'+(due?'🔴 今日待复习':'第'+(p.s+1)+'轮 · '+fmtDue(p.d)+'复习')+'</span>';
+}
+function speak(t){
+  try{
+    if(speak.cur){speak.cur.pause();speak.cur=null;}
+    const a=new Audio('audio/'+t.replace(/ /g,'_')+'.mp3');
+    speak.cur=a;
+    const p=a.play();
+    if(p)p.catch(()=>fallbackTTS(t));
+    return;
+  }catch(e){}
+  fallbackTTS(t);
+}
+function fallbackTTS(t){
+  if(!('speechSynthesis' in window)){alert('当前浏览器不支持语音，请换 Safari 打开');return;}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang='en-US';u.rate=0.85;
+  const v=speechSynthesis.getVoices().find(v=>v.lang.startsWith('en'));
+  if(v)u.voice=v;
+  speechSynthesis.speak(u);
+}
+function speakWord(w){speak(w);touch(w);refreshBadges(w);}
+function updateProg(){
+  const n=Object.keys(prog).length;
+  pbar.style.width=(n/DATA.length*100)+'%';
+  pinfo.textContent='已学 '+n+' / '+DATA.length+' · 待复习 '+dueList().length;
+}
+function dueList(){
+  return DATA.filter(d=>prog[d.w]&&prog[d.w].s<IV.length&&prog[d.w].d<=Date.now()).map(d=>d.w);
+}
+function refreshBadges(w){
+  const el=document.getElementById('bd_'+w.replace(/ /g,'_'));
+  if(el)el.outerHTML='<span id="bd_'+w.replace(/ /g,'_')+'">'+badgeHtml(w)+'</span>';
+}
+function renderLearn(){
+  let lastCat='';
+  let html='';
+  const initialDone=DATA.slice(0,24).every(d=>prog[d.w]);
+  const unlockedAll=extra>=BANK.length;
+  if(initialDone && !unlockedAll){
+    const unlockedToday=localStorage.getItem('eng_unlock_date')===new Date().toDateString();
+    const remain=BANK.length-extra;
+    html+='<div class="card" style="text-align:center;background:var(--accent-soft);border-color:var(--accent)">'+
+      '<div style="font-size:15px;font-weight:600;">初始 24 词已全部开始学习 🎉</div>'+
+      '<div style="font-size:13px;color:var(--muted);margin:6px 0 10px;">每天可解锁 5 个新词（剩余词库 '+remain+' 个）</div>'+
+      '<button class="next" style="max-width:240px;margin:0 auto;'+(unlockedToday?'opacity:.4':'')+'" onclick="unlockNew()">'+
+      (unlockedToday?'今日已解锁，明天再来':'解锁今日 5 个新词')+'</button></div>';
+  }else if(!initialDone){
+    html+='<div class="hint" style="text-align:center;margin-bottom:10px;">学完初始 24 词后，每天解锁 5 个新词（'+DATA.slice(0,24).filter(d=>prog[d.w]).length+'/24）</div>';
+  }
+  html+=DATA.map((d)=>{
+    const id=d.w.replace(/ /g,'_');
+    let html='';
+    if(d.c!==lastCat){lastCat=d.c;html+='<div class="cat">'+d.c+'</div>';}
+    html+='<div class="card'+(prog[d.w]&&prog[d.w].d<=Date.now()?' due':'')+'">'+
+      '<div class="row1"><span class="word">'+d.w+'</span><span class="pos">'+d.pos+'</span>'+
+      '<button class="speak" onclick="speakWord(\''+d.w.replace(/'/g,"\\'")+'\')" aria-label="发音">🔊</button></div>'+
+      '<div id="bd_'+id+'">'+badgeHtml(d.w)+'</div>'+
+      '<div class="ipa">'+d.ipa+'</div>'+
+      '<div class="cn">'+d.cn+'</div>'+
+      '<div class="ex"><div class="en">'+d.ex+'</div><div class="zh">'+d.exzh+'</div></div>'+
+      '<div class="use">用法：'+d.use+'</div></div>';
+    return html;
+  }).join('');
+  learnEl.innerHTML=html;
+}
+/* 复习 */
+let rvQueue=[],rvIdx=0;
+function renderReview(){
+  if(!rvQueue.length){
+    rvQueue=dueList();rvIdx=0;
+  }
+  if(!rvQueue.length){
+    const upcoming=DATA.filter(d=>prog[d.w]&&prog[d.w].s<IV.length);
+    const nextT=upcoming.length?Math.min(...upcoming.map(d=>prog[d.w].d)):0;
+    rvEl.innerHTML='<div class="rv-card rv-empty">🎉 今日复习任务已完成！<br>已进入记忆循环的单词：'+upcoming.length+' 个'+
+      (nextT?'<br>最近一次复习：<b>'+fmtDue(nextT)+'</b>':'')+
+      '<br><br>新学的词点🔊后自动加入复习计划</div>';
+    updateProg();
+    return;
+  }
+  const w=rvQueue[rvIdx];
+  const d=DATA.find(x=>x.w===w);
+  rvEl.innerHTML='<div class="rv-card">'+
+    '<div class="hint">复习 '+(rvIdx+1)+' / '+rvQueue.length+' · 第'+(prog[w].s+1)+'轮记忆</div>'+
+    '<div class="rv-word">'+d.w+'</div>'+
+    '<div class="rv-ipa">'+d.ipa+'</div>'+
+    '<button class="rv-speak" onclick="speak(\''+d.w.replace(/'/g,"\\'")+'\')">🔊 听发音</button>'+
+    '<div class="rv-cn" id="rvcn">'+d.cn+'<br><span style="font-size:13px;color:var(--muted)">'+d.ex+'</span></div>'+
+    '<div class="rv-btns">'+
+      '<button class="b-no" onclick="grade(false)">😅 没记住</button>'+
+      '<button class="b-yes" onclick="grade(true)">😄 记住了</button>'+
+    '</div>'+
+    '<button class="rv-next" id="rvnx" onclick="rvIdx++;renderReview()">下一个 →</button>'+
+    '<div class="hint">想不起释义再点「显示」，然后如实评分</div>'+
+  '</div>';
+  const btn=document.createElement('button');
+  btn.className='next';btn.textContent='显示释义';
+  btn.onclick=function(){document.getElementById('rvcn').style.display='block';btn.style.display='none';};
+  rvEl.querySelector('.rv-next').before(btn);
+}
+function grade(ok){
+  const w=rvQueue[rvIdx];
+  const p=prog[w];
+  if(ok){
+    p.s=Math.min(p.s+1,IV.length);
+    p.d=p.s>=IV.length?null:Date.now()+IV[p.s]*DAY;
+  }else{
+    p.s=0;p.d=Date.now()+30*MIN; /* 30分钟后重新出现 */
+  }
+  saveProg();
+  document.getElementById('rvnx').style.display='block';
+  document.querySelectorAll('.rv-btns button').forEach(b=>b.disabled=true);
+}
+/* 自测 */
+let qs=[],qi=0,score=0,answered=false;
+function shuffle(a){return a.slice().sort(()=>Math.random()-.5);}
+function startQuiz(){
+  qs=shuffle(DATA).map(d=>{
+    const wrongs=shuffle(DATA.filter(x=>x!==d)).slice(0,3).map(x=>x.cn);
+    return {w:d.w,ipa:d.ipa,answer:d.cn,opts:shuffle([d.cn,...wrongs])};
+  });
+  qi=0;score=0;renderQ();
+}
+function renderQ(){
+  answered=false;
+  if(qi>=qs.length){
+    quizEl.innerHTML='<div class="quiz-card done"><div class="big">'+score+' / '+qs.length+'</div><p>本轮测试完成</p><button class="next" onclick="startQuiz()">再来一轮</button></div>';
+    return;
+  }
+  const q=qs[qi];
+  quizEl.innerHTML='<div class="quiz-card">'+
+    '<div class="q-head"><span>第 '+(qi+1)+' / '+qs.length+' 题</span><span>得分 '+score+'</span></div>'+
+    '<div class="q-word">'+q.w+' <button class="speak" onclick="speak(\''+q.w.replace(/'/g,"\\'")+'\')" aria-label="发音">🔊</button></div>'+
+    '<div class="q-ipa">'+q.ipa+'</div>'+
+    q.opts.map(o=>'<button class="opt" onclick="pick(this,\''+q.answer.replace(/'/g,"\\'")+'\')">'+o+'</button>').join('')+
+    '<button class="next" id="nx" disabled onclick="qi++;renderQ()">下一题</button></div>';
+}
+function pick(btn,ans){
+  if(answered)return;answered=true;
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===ans)b.classList.add('right');
+  });
+  if(btn.textContent===ans)score++;else btn.classList.add('wrong');
+  document.getElementById('nx').disabled=false;
+}
+/* tabs */
+const tabs={learn:document.getElementById('tabLearn'),review:document.getElementById('tabReview'),quiz:document.getElementById('tabQuiz')};
+function show(name){
+  Object.entries(tabs).forEach(([k,b])=>b.classList.toggle('on',k===name));
+  learnEl.style.display=name==='learn'?'':'none';
+  rvEl.style.display=name==='review'?'':'none';
+  quizEl.style.display=name==='quiz'?'':'none';
+  if(name==='review'){rvQueue=[];renderReview();}
+  if(name==='quiz')startQuiz();
+  if(name==='learn')renderLearn();
+}
+tabs.learn.onclick=()=>show('learn');
+tabs.review.onclick=()=>show('review');
+tabs.quiz.onclick=()=>show('quiz');
+function resetProg(){
+  if(confirm('确定清空全部学习和复习进度，从零开始吗？')){
+    localStorage.removeItem('eng_prog');
+    localStorage.removeItem('eng_seen');
+    prog={};
+    renderLearn();updateProg();
+    alert('已重置。点单词旁的🔊即可重新开始学习。');
+  }
+}
+if('speechSynthesis' in window){speechSynthesis.onvoiceschanged=()=>{};speechSynthesis.getVoices();}
+renderLearn();updateProg();
+</script>
+</body>
+</html>
